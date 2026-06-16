@@ -1,46 +1,198 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
+
 <head>
-    <title>Formulario Institucuibes</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>Instituciones</title>
+
+<link 
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+rel="stylesheet">
+
 </head>
 
 <body class="container mt-4">
-<h2>Institución</h2>
+
+
+<div class="card shadow p-4">
+
+<h2 id="titulo">Nueva Institución</h2>
+
 
 <form id="formInstitucion">
 
-<input name="nombre" class="form-control mb-2" placeholder="Nombre">
-<input name="direccion" class="form-control mb-2" placeholder="Dirección">
-<input name="telefono" class="form-control mb-2" placeholder="Teléfono">
-<input name="responsable" class="form-control mb-2" placeholder="Responsable">
 
-<button class="btn btn-success">Guardar</button>
+<input id="nombre"
+class="form-control mb-2"
+placeholder="Nombre">
+
+
+<input id="direccion"
+class="form-control mb-2"
+placeholder="Dirección">
+
+
+<input id="telefono"
+class="form-control mb-2"
+placeholder="Teléfono">
+
+
+<input id="responsable"
+class="form-control mb-2"
+placeholder="Responsable">
+
+
+<button class="btn btn-success">
+Guardar
+</button>
+
+
+<a href="/instituciones/listar"
+class="btn btn-secondary">
+Volver
+</a>
+
 
 </form>
 
+</div>
+
+
 <script>
-document.getElementById("formInstitucion").addEventListener("submit", function(e){
-    e.preventDefault();
 
-    let data = {
-        nombre: this.nombre.value,
-        direccion: this.direccion.value,
-        telefono: this.telefono.value,
-        responsable: this.responsable.value
-    };
 
-    fetch("http://localhost:5000/instituciones", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(data)
-    })
-    .then(() => {
-        alert("Guardado");
-        window.location.href = "/instituciones/listar";
-    });
+const idInstitucion = {{ id_institucion }};
+const token = localStorage.getItem("token");
+
+
+
+if(!token){
+    alert("Debe iniciar sesión");
+    window.location.href="/login";
+}
+
+
+
+// EDITAR
+
+if(idInstitucion > 0){
+
+document.getElementById("titulo").innerHTML =
+"Editar Institución";
+
+
+fetch("/instituciones/" + idInstitucion,{
+    method:"GET",
+    headers:{
+        "Authorization":"Bearer " + token
+    }
+})
+
+.then(res=>res.json())
+
+.then(inst=>{
+
+    nombre.value = inst.nombre;
+    direccion.value = inst.direccion;
+    telefono.value = inst.telefono;
+    responsable.value = inst.responsable;
+
 });
+
+}
+
+
+
+
+
+document.getElementById("formInstitucion")
+.addEventListener("submit",function(e){
+
+e.preventDefault();
+
+
+
+let datos={
+
+nombre:nombre.value,
+direccion:direccion.value,
+telefono:telefono.value,
+responsable:responsable.value
+
+};
+
+
+
+// NUEVO
+
+if(idInstitucion == 0){
+
+
+fetch("/instituciones",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + token
+},
+
+body:JSON.stringify(datos)
+
+})
+
+.then(res=>res.json())
+
+.then(data=>{
+
+alert(data.mensaje || "Guardado");
+
+window.location.href="/instituciones/listar";
+
+});
+
+
+}
+
+
+
+// EDITAR
+
+else{
+
+
+fetch("/instituciones/"+idInstitucion,{
+
+method:"PUT",
+
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + token
+},
+
+body:JSON.stringify(datos)
+
+})
+
+.then(res=>res.json())
+
+.then(data=>{
+
+alert(data.mensaje || "Actualizado");
+
+window.location.href="/instituciones/listar";
+
+});
+
+
+}
+
+
+
+});
+
+
 </script>
+
 
 </body>
 </html>
