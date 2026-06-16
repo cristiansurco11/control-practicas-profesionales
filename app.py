@@ -41,7 +41,7 @@ def estudiantes_listar():
 
 @app.route("/estudiantes/nuevo")
 def estudiantes_nuevo():
-    return render_template("estudiantes/form.html")
+    return render_template("estudiantes/añadirEstudiante.html")
 
 @app.route('/estudiantes/editar/<int:id_estudiante>')
 def editar_estudiante(id_estudiante):
@@ -62,7 +62,7 @@ def instituciones_listar():
 
 @app.route("/instituciones/nuevo")
 def instituciones_nuevo():
-    return render_template("instituciones/form.html")
+    return render_template("instituciones/anadirInstitucion.html")
 
 @app.route('/instituciones/editar/<int:id_institucion>')
 def editar_institucion(id_institucion):
@@ -79,7 +79,7 @@ def practicas_listar():
 
 @app.route("/practicas/nuevo")
 def practicas_nuevo():
-    return render_template("practicas/form.html")
+    return render_template("practicas/anadirPractica.html")
 
 @app.route('/practicas/editar/<int:id_practica>')
 def editar_practica(id_practica):
@@ -96,7 +96,7 @@ def observaciones_listar():
 
 @app.route("/observaciones/nuevo")
 def observaciones_nuevo():
-    return render_template("observaciones/form.html") 
+    return render_template("observaciones/anadirObservacion.html") 
 
 @app.route('/observaciones/editar/<int:id_observacion>')
 def editarObservacion(id_observacion):
