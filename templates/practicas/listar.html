@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <!-- BOTONES SUPERIORES -->
+    <div class="mb-3">
+        <a href="/base" class="btn btn-secondary">
+            Volver al Inicio
+        </a>
+
+        <a href="/practicas/nuevo" class="btn btn-primary">
+            Nueva Práctica
+        </a>
+    </div>
+
+    <!-- TÍTULO -->
+    <h1 class="text-center mb-4">Lista de Prácticas</h1>
+
+    <!-- CARD TABLA -->
+    <div class="card shadow p-4">
+
+        <table class="table table-bordered table-hover">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Estudiante</th>
+                    <th>Institución</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Horas</th>
+                    <th>Estado</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+
+            <tbody id="tabla-practicas"></tbody>
+
+        </table>
+
+    </div>
+</div>
+
+<script>
+
+const token = localStorage.getItem('token');
+const tabla = document.getElementById('tabla-practicas');
+
+
+// 🔐 PROTECCIÓN
+if (!token) {
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="8" class="text-center text-danger fw-bold">
+                Debe autenticarse primero
+            </td>
+        </tr>
+    `;
+
+} else {
+
+    // 📥 LISTAR PRÁCTICAS
+    fetch('http://localhost:5000/practicas', {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        tabla.innerHTML = '';
+
+        data.forEach(p => {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${p.id_practica}</td>
+
+                    <!-- IMPORTANTE: aquí aún vienen IDs -->
+                    <td>${p.id_estudiante}</td>
+                    <td>${p.id_institucion}</td>
+
+                    <td>${p.fecha_inicio}</td>
+                    <td>${p.fecha_fin}</td>
+                    <td>${p.horas}</td>
+                    <td>
+                        <span class="badge bg-${p.estado === 'Activa' ? 'success' : 'secondary'}">
+                            ${p.estado}
+                        </span>
+                    </td>
+
+                    <td>
+                        <button class="btn btn-warning btn-sm"
+                            onclick="window.location.href='/practicas/editar/${p.id_practica}'">
+                            Editar
+                        </button>
+
+                        <button class="btn btn-danger btn-sm"
+                            onclick="eliminarPractica(${p.id_practica})">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+// 🗑️ ELIMINAR PRÁCTICA
+function eliminarPractica(id) {
+
+    const confirmar = confirm("¿Está seguro de eliminar la práctica?");
+    if (!confirmar) return;
+
+    const token = localStorage.getItem('token');
+
+    fetch('http://localhost:5000/practicas/' + id, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.mensaje || "Eliminado correctamente");
+        location.reload();
+    })
+    .catch(error => console.error(error));
+}
+
+</script>
+
+{% endblock %}

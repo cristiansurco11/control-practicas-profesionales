@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <!-- BOTONES SUPERIORES -->
+    <div class="mb-3">
+        <a href="/base" class="btn btn-secondary">
+            Volver al Inicio
+        </a>
+
+        <a href="/instituciones/nuevo" class="btn btn-primary">
+            Nueva Institución
+        </a>
+    </div>
+
+    <!-- TÍTULO -->
+    <h1 class="text-center mb-4">Lista de Instituciones</h1>
+
+    <!-- CARD TABLA -->
+    <div class="card shadow p-4">
+
+        <table class="table table-bordered table-hover">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Responsable</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+
+            <tbody id="tabla-instituciones"></tbody>
+
+        </table>
+
+    </div>
+</div>
+
+<script>
+
+const token = localStorage.getItem('token');
+const tabla = document.getElementById('tabla-instituciones');
+
+
+// 🔐 PROTECCIÓN (sin token no entra)
+if (!token) {
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="6" class="text-center text-danger fw-bold">
+                Debe autenticarse primero
+            </td>
+        </tr>
+    `;
+
+} else {
+
+    // 📥 LISTAR INSTITUCIONES
+    fetch('http://localhost:5000/instituciones', {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        tabla.innerHTML = '';
+
+        data.forEach(inst => {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${inst.id_institucion}</td>
+                    <td>${inst.nombre}</td>
+                    <td>${inst.direccion}</td>
+                    <td>${inst.telefono}</td>
+                    <td>${inst.responsable}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm"
+                            onclick="window.location.href='/instituciones/editar/${inst.id_institucion}'">
+                            Editar
+                        </button>
+
+                        <button class="btn btn-danger btn-sm"
+                            onclick="eliminarInstitucion(${inst.id_institucion})">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+// 🗑️ ELIMINAR INSTITUCIÓN
+function eliminarInstitucion(id) {
+
+    const confirmar = confirm("¿Está seguro de eliminar la institución?");
+    if (!confirmar) return;
+
+    const token = localStorage.getItem('token');
+
+    fetch('http://localhost:5000/instituciones/' + id, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.mensaje || "Eliminado correctamente");
+        location.reload();
+    })
+    .catch(error => console.error(error));
+}
+
+</script>
+
+{% endblock %}
