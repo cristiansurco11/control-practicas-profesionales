@@ -9,7 +9,7 @@
         </a>
 
         <a href="/observaciones/nuevo" class="btn btn-primary">
-            Nueva Observación
+            Nueva Obsercacion
         </a>
     </div>
 
@@ -24,14 +24,17 @@
             <thead class="table-dark">
                 <tr>
                     <th>ID</th>
-                    <th>ID Práctica</th>
-                    <th>Descripción</th>
-                    <th>Fecha</th>
+                    <th>Estudiante</th>
+                    <th>Institución</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Horas</th>
+                    <th>Estado</th>
                     <th>Opciones</th>
                 </tr>
             </thead>
 
-            <tbody id="tabla-observaciones"></tbody>
+            <tbody id="tabla-practicas"></tbody>
 
         </table>
 
@@ -41,15 +44,15 @@
 <script>
 
 const token = localStorage.getItem('token');
-const tabla = document.getElementById('tabla-observaciones');
+const tabla = document.getElementById('tabla-practicas');
 
 
-// 🔐 PROTECCIÓN (sin token no entra)
+// 🔐 PROTECCIÓN
 if (!token) {
 
     tabla.innerHTML = `
         <tr>
-            <td colspan="5" class="text-center text-danger fw-bold">
+            <td colspan="8" class="text-center text-danger fw-bold">
                 Debe autenticarse primero
             </td>
         </tr>
@@ -57,8 +60,8 @@ if (!token) {
 
 } else {
 
-    // 📥 LISTAR OBSERVACIONES
-    fetch('http://localhost:5000/observaciones', {
+    // 📥 LISTAR PRÁCTICAS
+    fetch('http://localhost:5000/practicas', {
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token
@@ -69,21 +72,32 @@ if (!token) {
 
         tabla.innerHTML = '';
 
-        data.forEach(obs => {
+        data.forEach(p => {
             tabla.innerHTML += `
                 <tr>
-                    <td>${obs.id_observacion}</td>
-                    <td>${obs.id_practica}</td>
-                    <td>${obs.descripcion}</td>
-                    <td>${obs.fecha}</td>
+                    <td>${p.id_practica}</td>
+
+                    <!-- IMPORTANTE: aquí aún vienen IDs -->
+                    <td>${p.id_estudiante}</td>
+                    <td>${p.id_institucion}</td>
+
+                    <td>${p.fecha_inicio}</td>
+                    <td>${p.fecha_fin}</td>
+                    <td>${p.horas}</td>
+                    <td>
+                        <span class="badge bg-${p.estado === 'Activa' ? 'success' : 'secondary'}">
+                            ${p.estado}
+                        </span>
+                    </td>
+
                     <td>
                         <button class="btn btn-warning btn-sm"
-                            onclick="window.location.href='/observaciones/editar/${obs.id_observacion}'">
+                            onclick="window.location.href='/practicas/editar/${p.id_practica}'">
                             Editar
                         </button>
 
                         <button class="btn btn-danger btn-sm"
-                            onclick="eliminarObservacion(${obs.id_observacion})">
+                            onclick="eliminarPractica(${p.id_practica})">
                             Eliminar
                         </button>
                     </td>
@@ -96,15 +110,15 @@ if (!token) {
 }
 
 
-// 🗑️ ELIMINAR OBSERVACIÓN
-function eliminarObservacion(id) {
+// 🗑️ ELIMINAR PRÁCTICA
+function eliminarPractica(id) {
 
-    const confirmar = confirm("¿Está seguro de eliminar la observación?");
+    const confirmar = confirm("¿Está seguro de eliminar la práctica?");
     if (!confirmar) return;
 
     const token = localStorage.getItem('token');
 
-    fetch('http://localhost:5000/observaciones/' + id, {
+    fetch('http://localhost:5000/practicas/' + id, {
         method: 'DELETE',
         headers: {
             'Authorization': 'Bearer ' + token
